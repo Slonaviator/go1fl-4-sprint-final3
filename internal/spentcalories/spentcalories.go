@@ -30,23 +30,24 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 	// TODO: реализовать функцию
 	sliceData := strings.Split(data, ",")
 	if len(sliceData) != 3 {
-		return 0, "", 0, errors.New("не корректный состав строки: <>3")
+		return 0, "", 0, errors.New("incorrect string composition: <>3")
 	}
 
 	numberOfSteps, err := strconv.Atoi(sliceData[0])
 	if err != nil {
-		return 0, "", 0, err
-	} else if numberOfSteps <= 0 {
-		err := errors.New("количество шагов <= 0")
-		return 0, "", 0, err
+		return 0, "", 0, fmt.Errorf("steps conversion error: %w", err)
+	}
+	if numberOfSteps <= 0 {
+		err := errors.New("number of steps <= 0")
+		return 0, "", 0, fmt.Errorf("steps number <=0: %w", err)
 	}
 
 	duration, err := time.ParseDuration(sliceData[2])
 	if err != nil {
 		return 0, "", 0, err
 	} else if duration <= 0 {
-		err := errors.New("заданное время <= 0")
-		return 0, "", 0, err
+		err := errors.New("set time <= 0")
+		return 0, "", 0, fmt.Errorf("duration: %w", err)
 	}
 
 	return numberOfSteps, sliceData[1], duration, nil
@@ -91,14 +92,20 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 	switch typeActiv {
 	case "Ходьба":
 		numberOfCalories, err = WalkingSpentCalories(numberOfSteps, weight, height, duration)
+		if err != nil {
+			log.Println(err)
+		}
 		distanceActive = distance(numberOfSteps, height)
 		speedActive = meanSpeed(numberOfSteps, height, duration)
 	case "Бег":
 		numberOfCalories, err = RunningSpentCalories(numberOfSteps, weight, height, duration)
+		if err != nil {
+			log.Println(err)
+		}
 		distanceActive = distance(numberOfSteps, height)
 		speedActive = meanSpeed(numberOfSteps, height, duration)
 	default:
-		return "", errors.New("неизвестный тип тренировки")
+		return "", errors.New("unknown type of training")
 	}
 
 	message := fmt.Sprintf("Тип тренировки: %s\nДлительность: %.2f ч.\n"+

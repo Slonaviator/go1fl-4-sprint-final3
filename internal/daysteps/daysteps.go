@@ -2,7 +2,6 @@ package daysteps
 
 import (
 	"errors"
-	//"errors"
 	"fmt"
 	"github.com/Yandex-Practicum/tracker/internal/spentcalories"
 	"log"
@@ -29,22 +28,23 @@ func parsePackage(data string) (int, time.Duration, error) {
 
 	sliceData := strings.Split(data, ",")
 	if len(sliceData) != 2 {
-		return 0, 0, errors.New("не корректный состав строки: <>2")
+		return 0, 0, errors.New("incorrect string composition: <>2")
 	}
 	numberOfSteps, err := strconv.Atoi(sliceData[0])
 	if err != nil {
-		return 0, 0, err
-	} else if numberOfSteps <= 0 {
-		err := errors.New("количество шагов <= 0")
-		return 0, 0, err
+		return 0, 0, fmt.Errorf("steps conversion error: %w", err)
+	}
+	if numberOfSteps <= 0 {
+		err := errors.New("number of steps <= 0")
+		return 0, 0, fmt.Errorf("steps number <=0: %w", err)
 	}
 
 	duration, err := time.ParseDuration(sliceData[1])
 	if err != nil {
 		return 0, 0, err
 	} else if duration <= 0 {
-		err := errors.New("заданное время <= 0")
-		return 0, 0, err
+		err := errors.New("set time <= 0")
+		return 0, 0, fmt.Errorf("duration: %w", err)
 	}
 	return numberOfSteps, duration, nil
 }
@@ -61,7 +61,7 @@ func DayActionInfo(data string, weight, height float64) string {
 	var duration time.Duration
 	numberOfSteps, duration, err := parsePackage(data)
 	if err != nil || numberOfSteps <= 0 {
-		log.Printf("не корректный формат или кол-во шагов: %v", err)
+		log.Printf("incorrect format or number of steps: %v", err)
 		return ""
 	}
 
@@ -76,7 +76,7 @@ func DayActionInfo(data string, weight, height float64) string {
 
 	numberCalStep, err := spentcalories.WalkingSpentCalories(numberOfSteps, weight, height, duration)
 	if err != nil {
-		log.Printf("не корректный формат: %v", err)
+		log.Printf("incorrect format: %v", err)
 		return ""
 	}
 	message := fmt.Sprintf("Количество шагов: %d.\n"+
